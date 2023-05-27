@@ -1,13 +1,19 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 
+import hash from "object-hash";
+import { atom, useAtom } from "jotai";
 import { SimplePool, utils } from "nostr-tools";
 
-const defaultRelays = ["wss://nos.lol"];
+const defaultRelays = ["wss://nos.lol", "wss://nostr.wine"];
 export const pool = new SimplePool();
 
 export function useEvents(filters, relays = defaultRelays) {
   const [eose, setEose] = useState(false);
   const [events, setEvents] = useState([]);
+
+  const subHash = useMemo(() => {
+    return hash({ filters, relays });
+  }, [filters, relays]);
 
   useEffect(() => {
     if (filters) {
@@ -33,7 +39,7 @@ export function useEvents(filters, relays = defaultRelays) {
         sub.unsub();
       };
     }
-  }, []);
+  }, [subHash]);
 
   return { eose, events };
 }
@@ -56,20 +62,31 @@ const uniqByFn = <T>(arr: T[], keyFn: any): T[] => {
   );
 };
 
-// todo: cache
+const profilesAtom = atom({});
+
 export function useProfile(pubkey) {
-  const [profile, setProfile] = useState();
+  const [profiles, setProfiles] = useAtom(profilesAtom);
 
   useEffect(() => {
     if (pubkey) {
+      if (profiles[pubkey]) {
+        return;
+      }
+      setProfiles((ps) => {
+        return { ...ps, [pubkey]: {} };
+      });
       pool
         .get(["wss://purplepag.es"], {
           kinds: [0],
           authors: [pubkey],
         })
-        .then((ev) => setProfile(JSON.parse(ev.content)));
+        .then((ev) =>
+          setProfiles((ps) => {
+            return { ...ps, [pubkey]: JSON.parse(ev.content) };
+          })
+        );
     }
   }, [pubkey]);
 
-  return profile;
+  return profiles[pubkey];
 }

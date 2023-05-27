@@ -17,8 +17,8 @@ import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
 // todo: edit
 export default function CreateList({ event, showPreview = true }) {
   const router = useRouter();
-  const [relays, setRelays] = useAtom(relaysAtom);
-  const [pubkey, setPubkey] = useAtom(pubkeyAtom);
+  const [relays] = useAtom(relaysAtom);
+  const [pubkey] = useAtom(pubkeyAtom);
 
   const [listName, setListName] = useState(
     event ? event.tags.find((t) => t.at(0) === "d")?.at(1) ?? "" : ""
@@ -51,28 +51,6 @@ export default function CreateList({ event, showPreview = true }) {
     }
     return event;
   }, [listName, pairs]);
-
-  useEffect(() => {
-    if (window.nostr && !pubkey) {
-      window.nostr.getPublicKey().then(setPubkey);
-    }
-  }, [pubkey]);
-
-  useEffect(() => {
-    if (pubkey) {
-      pool
-        .get(relays, {
-          kinds: [10002],
-          authors: [pubkey],
-        })
-        .then((ev) => {
-          const relays = ev.tags
-            .filter((t) => t.at(0) === "r")
-            .map((t) => t.at(1));
-          setRelays(relays);
-        });
-    }
-  }, [pubkey]);
 
   const handleListNameChange = (event) => {
     setListName(event.target.value);

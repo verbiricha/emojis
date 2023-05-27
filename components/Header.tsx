@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { Flex, Heading, Text, Button } from "@chakra-ui/react";
+
+import { Flex, Heading } from "@chakra-ui/react";
+
+import Login from "@emoji/components/Login";
 
 export default function Header() {
   return (
@@ -8,9 +11,7 @@ export default function Header() {
         <Link href="/">
           <Heading>🤗</Heading>
         </Link>
-        <Link href="/new">
-          <Button>New</Button>
-        </Link>
+        <Login />
       </Flex>
     </Flex>
   );
