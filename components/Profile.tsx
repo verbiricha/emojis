@@ -29,7 +29,7 @@ export default function Profile({ pubkey }) {
       )}
       <Stack>
         {events.map((ev) => (
-          <List event={ev} />
+          <List key={ev.id} event={ev} />
         ))}
       </Stack>
     </Flex>

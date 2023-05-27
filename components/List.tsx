@@ -62,8 +62,8 @@ export default function List({ event }) {
       </CardHeader>
       <CardBody>
         <Stack spacing={1}>
-          {emojis.map((e) => (
-            <EmojiTag tag={e} />
+          {emojis.map((e, idx) => (
+            <EmojiTag key={idx} tag={e} />
           ))}
         </Stack>
       </CardBody>
