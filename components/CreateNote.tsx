@@ -22,7 +22,7 @@ import { useAtom } from "jotai";
 import Note from "@emoji/components/Note";
 import Emoji from "@emoji/components/Emoji";
 import { EMOJIS } from "@emoji/nostr/const";
-import { useEvents } from "@emoji/nostr/hooks";
+import { pool, useEvents } from "@emoji/nostr/hooks";
 import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
 
 function filterEmojis(tags: string[], token: string) {
