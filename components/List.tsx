@@ -40,7 +40,7 @@ import Zaps from "@emoji/components/Zaps";
 import User from "@emoji/components/User";
 import EmojiList from "@emoji/components/EmojiList";
 
-function ListMenu({ naddr, event }) {
+function ListMenu({ naddr, event, isDetail }) {
   const router = useRouter();
   const [pubkey] = useAtom(pubkeyAtom);
   const [relays] = useAtom(relaysAtom);
@@ -91,18 +91,20 @@ function ListMenu({ naddr, event }) {
         <MenuItem icon={<AddIcon />} onClick={addToMyEmoji}>
           Add to my emoji
         </MenuItem>
-        <MenuItem
-          icon={<ExternalLinkIcon />}
-          onClick={() => router.push(`/a/${naddr}`)}
-        >
-          Open
-        </MenuItem>
+        {!isDetail && (
+          <MenuItem
+            icon={<ExternalLinkIcon />}
+            onClick={() => router.push(`/a/${naddr}`)}
+          >
+            Open
+          </MenuItem>
+        )}
       </MenuList>
     </Menu>
   );
 }
 
-export default function List({ event, showMenu = true }) {
+export default function List({ event, showMenu = true, isDetail = false }) {
   const identifier = getIdentifier(event);
   const emojis = event.tags.filter((t) => t.at(0) === "emoji");
   const naddr = useMemo(() => {
@@ -115,7 +117,7 @@ export default function List({ event, showMenu = true }) {
     }
   }, [event]);
   return (
-    <Card w="16rem">
+    <Card w={isDetail ? "40rem" : "16rem"}>
       <CardHeader>
         <Flex alignItems="center" justifyContent="space-between">
           {naddr ? (
@@ -125,14 +127,19 @@ export default function List({ event, showMenu = true }) {
           ) : (
             <Heading>{identifier}</Heading>
           )}
-          {showMenu && <ListMenu naddr={naddr} event={event} />}
+          {showMenu && (
+            <ListMenu naddr={naddr} event={event} isDetail={isDetail} />
+          )}
         </Flex>
       </CardHeader>
       <CardBody>
         <EmojiList emojis={emojis} />
       </CardBody>
       <CardFooter>
-        <User pubkey={event.pubkey} />
+        <Flex justifyContent="space-between" width="100%">
+          {isDetail && <Zaps event={event} />}
+          <User pubkey={event.pubkey} />
+        </Flex>
       </CardFooter>
     </Card>
   );

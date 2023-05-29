@@ -20,7 +20,7 @@ export default function Zaps({ event }) {
       kinds: [ZAP],
     },
   ];
-  const { events, eose } = useEvents(filters, relays, { closeOnEose: true });
+  const { events, eose } = useEvents(filters, relays, { closeOnEose: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const zappers = useMemo(() => {
     return events
