@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAtom } from "jotai";
 import {
   Flex,
   Stack,
@@ -10,27 +12,98 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
   Button,
 } from "@chakra-ui/react";
-import { AddIcon, EditIcon } from "@chakra-ui/icons";
+import {
+  AddIcon,
+  EditIcon,
+  HamburgerIcon,
+  ExternalLinkIcon,
+  RepeatIcon,
+} from "@chakra-ui/icons";
 import { nip19 } from "nostr-tools";
 
+import { USER_EMOJIS } from "@emoji/nostr/const";
+import { pool } from "@emoji/nostr/hooks";
+import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
+import { getIdentifier, getAddress } from "@emoji/nostr/address";
 import Zaps from "@emoji/components/Zaps";
 import User from "@emoji/components/User";
-import Emoji from "@emoji/components/Emoji";
+import EmojiList from "@emoji/components/EmojiList";
 
-function EmojiTag({ tag }) {
-  const [_, name, src] = tag;
+function ListMenu({ naddr, event }) {
+  const router = useRouter();
+  const [pubkey] = useAtom(pubkeyAtom);
+  const [relays] = useAtom(relaysAtom);
+
+  async function addToMyEmoji() {
+    try {
+      const userEmoji = await pool.get(relays, {
+        kinds: [USER_EMOJIS],
+        authors: [pubkey],
+      });
+      if (userEmoji) {
+        const address = getAddress(event);
+        const tags = userEmoji.tags.filter(
+          (t) => t.at(0) === "a" && t.at(1) !== address
+        );
+        const ev = {
+          kind: USER_EMOJIS,
+          content: "",
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [...tags, ["a", address]],
+        };
+        const signed = await window.nostr.signEvent(ev);
+        pool.publish(relays, signed);
+      } else {
+        const ev = {
+          kind: USER_EMOJIS,
+          content: "",
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [["a", getAddress(event)]],
+        };
+        const signed = await window.nostr.signEvent(ev);
+        pool.publish(relays, signed);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
-    <Stack align="center" direction="row">
-      <Emoji src={src} name={name} />
-      <Text fontSize="lg">{name}</Text>
-    </Stack>
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        aria-label="Options"
+        icon={<HamburgerIcon />}
+        variant="unstyled"
+      />
+      <MenuList>
+        <MenuItem icon={<AddIcon />} onClick={addToMyEmoji}>
+          Add to my emoji
+        </MenuItem>
+        <MenuItem
+          icon={<ExternalLinkIcon />}
+          onClick={() => router.push(`/a/${naddr}`)}
+        >
+          Open
+        </MenuItem>
+      </MenuList>
+    </Menu>
   );
 }
 
-export default function List({ event }) {
-  const identifier = event.tags.find((t) => t.at(0) === "d")?.at(1);
+export default function List({ event, showMenu = true }) {
+  const identifier = getIdentifier(event);
   const emojis = event.tags.filter((t) => t.at(0) === "emoji");
   const naddr = useMemo(() => {
     if (event.pubkey) {
@@ -42,31 +115,25 @@ export default function List({ event }) {
     }
   }, [event]);
   return (
-    <Card minW="22rem" maxW="42rem" p={0}>
+    <Card w="16rem">
       <CardHeader>
         <Flex alignItems="center" justifyContent="space-between">
           {naddr ? (
             <Link href={`/a/${naddr}`}>
-              <Heading>{identifier}</Heading>
+              <Heading fontSize="xl">{identifier}</Heading>
             </Link>
           ) : (
             <Heading>{identifier}</Heading>
           )}
-          <User pubkey={event.pubkey} />
+          {showMenu && <ListMenu naddr={naddr} event={event} />}
         </Flex>
       </CardHeader>
       <CardBody>
-        <Stack spacing={1}>
-          {emojis.map((e, idx) => (
-            <EmojiTag key={idx} tag={e} />
-          ))}
-        </Stack>
+        <EmojiList emojis={emojis} />
       </CardBody>
-      {false && (
-        <CardFooter>
-          <Zaps event={event} />
-        </CardFooter>
-      )}
+      <CardFooter>
+        <User pubkey={event.pubkey} />
+      </CardFooter>
     </Card>
   );
 }

@@ -92,9 +92,9 @@ export default function CreateList({ event, showPreview = true }) {
     <Flex justifyContent="center">
       <Flex flex={1} flexDirection="column" maxW="52rem">
         <Stack>
-          <Heading>Create emoji list</Heading>
+          <Heading>Create emoji pack</Heading>
           <Input
-            placeholder="List name"
+            placeholder="Pack name"
             value={listName}
             onChange={handleListNameChange}
           />
@@ -108,7 +108,7 @@ export default function CreateList({ event, showPreview = true }) {
             )}
             <Input
               maxW="20em"
-              placeholder="Name"
+              placeholder="Emoji name"
               value={name}
               onChange={handleNameChange}
             />

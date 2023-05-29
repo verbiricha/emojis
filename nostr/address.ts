@@ -2,7 +2,7 @@ function isParamReplaceable(event) {
   return event.kind >= 30000 || event.kind <= 40000;
 }
 
-function getIdentifier(event) {
+export function getIdentifier(event) {
   return event.tags.find((t) => t.at(0) === "d")?.at(1);
 }
 

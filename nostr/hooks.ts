@@ -13,7 +13,7 @@ const defaultRelays = [
   "wss://nos.lol",
   "wss://nostr.wine",
 ];
-export const pool = new SimplePool();
+export const pool = new SimplePool({ getTimeout: 2000 });
 
 export function useEvents(
   filters,
