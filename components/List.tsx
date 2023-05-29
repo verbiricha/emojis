@@ -104,7 +104,12 @@ function ListMenu({ naddr, event, isDetail }) {
   );
 }
 
-export default function List({ event, showMenu = true, isDetail = false }) {
+export default function List({
+  event,
+  showMenu = true,
+  isDetail = false,
+  ...rest
+}) {
   const identifier = getIdentifier(event);
   const emojis = event.tags.filter((t) => t.at(0) === "emoji");
   const naddr = useMemo(() => {
@@ -117,7 +122,7 @@ export default function List({ event, showMenu = true, isDetail = false }) {
     }
   }, [event]);
   return (
-    <Card w={isDetail ? "auto" : "16rem"} maxW="40rem">
+    <Card {...rest}>
       <CardHeader>
         <Flex alignItems="center" justifyContent="space-between">
           {naddr ? (
@@ -132,7 +137,7 @@ export default function List({ event, showMenu = true, isDetail = false }) {
           )}
         </Flex>
       </CardHeader>
-      <CardBody>
+      <CardBody maxH="21rem" overflow="scroll">
         <EmojiList emojis={emojis} />
       </CardBody>
       <CardFooter>

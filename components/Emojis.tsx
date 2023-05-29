@@ -16,7 +16,7 @@ export default function Emoji({ kind, pubkey, identifier }) {
   );
   return (
     <Flex flexDirection="column" alignItems="center">
-      {events[0] && <List event={events[0]} isDetail />}
+      {events[0] && <List event={events[0]} isDetail w="100%" maxW="52rem" />}
     </Flex>
   );
 }

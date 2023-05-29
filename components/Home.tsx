@@ -17,7 +17,7 @@ export default function HomeContent() {
     <Flex alignItems="center" justifyContent="center">
       <EmojiGrid>
         {events.map((e) => (
-          <Emojis key={e.id} event={e} maxH="21rem" overflow="scroll" />
+          <Emojis key={e.id} event={e} />
         ))}
       </EmojiGrid>
     </Flex>
