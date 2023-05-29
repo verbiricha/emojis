@@ -5,6 +5,7 @@ import { atom, useAtom } from "jotai";
 import { SimplePool, utils } from "nostr-tools";
 
 import { getAddress } from "@emoji/nostr/address";
+import { uniqByFn } from "@emoji/nostr/util";
 
 const defaultRelays = [
   "wss://purplepag.es",
@@ -53,24 +54,6 @@ export function useEvents(
 
   return { eose, events };
 }
-
-const uniqByFn = <T>(arr: T[], keyFn: any): T[] => {
-  return Object.values(
-    arr.reduce((map, item) => {
-      const key = keyFn(item);
-      if (map[key]) {
-        return {
-          ...map,
-          [key]: map[key].created_at > item.created_at ? map[key] : item,
-        };
-      }
-      return {
-        ...map,
-        [key]: item,
-      };
-    }, {})
-  );
-};
 
 // todo: local storage atom
 const profilesAtom = atom({});

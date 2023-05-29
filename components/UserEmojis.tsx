@@ -9,9 +9,10 @@ import { useEvents } from "@emoji/nostr/hooks";
 import { relaysAtom } from "@emoji/user/state";
 import EmojiList from "@emoji/components/EmojiList";
 
-export default function UserEmojis({ event }) {
+export function useUserEmojis(event) {
   const [relays] = useAtom(relaysAtom);
-  const addresses = event.tags
+  const tags = event ? event.tags : [];
+  const addresses = tags
     .filter((t) => t.at(0) === "a" && t.at(1)?.startsWith(`${EMOJIS}:`))
     .map((t) => t.at(1))
     .filter((t) => t);
@@ -30,16 +31,20 @@ export default function UserEmojis({ event }) {
     }
   );
   const { events, eose } = useEvents([filter], relays);
-  const mainEmojis = event.tags.filter((t) => t.at(0) === "emoji");
+  const mainEmojis = tags.filter((t) => t.at(0) === "emoji");
   const linkedEmojis = events
     .filter((e) =>
-      event.tags.find((t) => t.at(0) === "a" && t.at(1) === getAddress(e))
+      tags.find((t) => t.at(0) === "a" && t.at(1) === getAddress(e))
     )
     .map((e) => e.tags.filter((t) => t.at(0) === "emoji"))
     .reverse()
     .flat();
-  const emojis = [...mainEmojis, ...linkedEmojis];
-  return addresses.length > 0 ? (
+  return [...mainEmojis, ...linkedEmojis];
+}
+
+export default function UserEmojis({ event }) {
+  const emojis = useUserEmojis(event);
+  return emojis.length > 0 ? (
     <>
       <Box maxW="52em" px={2}>
         <EmojiList emojis={emojis} />

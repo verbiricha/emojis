@@ -20,13 +20,15 @@ import {
 import { useAtom } from "jotai";
 
 import Note from "@emoji/components/Note";
+import { uniqByFn } from "@emoji/nostr/util";
 import Emoji from "@emoji/components/Emoji";
-import { EMOJIS } from "@emoji/nostr/const";
+import { USER_EMOJIS, EMOJIS } from "@emoji/nostr/const";
+import { useUserEmojis } from "@emoji/components/UserEmojis";
 import { pool, useEvents } from "@emoji/nostr/hooks";
 import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
 
 function filterEmojis(tags: string[], token: string) {
-  return tags
+  const results = tags
     .filter((t) => t.at(0) === "emoji")
     .map((t) => {
       const [, name, url] = t;
@@ -35,6 +37,7 @@ function filterEmojis(tags: string[], token: string) {
     .filter(({ name, url }) => {
       return name.includes(token);
     });
+  return uniqByFn(results, ({ name }) => name);
 }
 
 function EmojiItem({ name, url, ...rest }) {
@@ -55,16 +58,17 @@ export default function CreateNote({ event, showPreview = true }) {
   const [content, setContent] = useState("");
 
   const { events } = useEvents(
-    [{ kinds: [EMOJIS], authors: [pubkey] }],
+    [{ kinds: [USER_EMOJIS, EMOJIS], authors: [pubkey] }],
     relays
   );
+  const userEmojis = useUserEmojis(events.find((e) => e.kind === USER_EMOJIS));
   const emojis = useMemo(() => {
     let results = [];
     events.forEach((ev) => {
       const es = ev.tags.filter((t) => t.at(0) === "emoji");
       results = results.concat(es);
     });
-    return results;
+    return results.concat(userEmojis);
   }, [events]);
 
   const ev = useMemo(() => {
