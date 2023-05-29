@@ -117,7 +117,7 @@ export default function List({ event, showMenu = true, isDetail = false }) {
     }
   }, [event]);
   return (
-    <Card w={isDetail ? "40rem" : "16rem"}>
+    <Card w={isDetail ? "auto" : "16rem"} maxW="40rem">
       <CardHeader>
         <Flex alignItems="center" justifyContent="space-between">
           {naddr ? (
