@@ -4,7 +4,13 @@ import hash from "object-hash";
 import { atom, useAtom } from "jotai";
 import { SimplePool, utils } from "nostr-tools";
 
-const defaultRelays = ["wss://nos.lol", "wss://nostr.wine"];
+const defaultRelays = [
+  "wss://purplepag.es",
+  "wss://relay.damus.io",
+  "wss://relay.snort.social",
+  "wss://nos.lol",
+  "wss://nostr.wine",
+];
 export const pool = new SimplePool();
 
 export function useEvents(filters, relays = defaultRelays) {
@@ -76,7 +82,7 @@ export function useProfile(pubkey) {
         return { ...ps, [pubkey]: {} };
       });
       pool
-        .get(["wss://purplepag.es"], {
+        .get(defaultRelays, {
           kinds: [0],
           authors: [pubkey],
         })
