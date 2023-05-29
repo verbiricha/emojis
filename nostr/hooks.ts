@@ -4,6 +4,8 @@ import hash from "object-hash";
 import { atom, useAtom } from "jotai";
 import { SimplePool, utils } from "nostr-tools";
 
+import { getAddress } from "@emoji/nostr/address";
+
 const defaultRelays = [
   "wss://purplepag.es",
   "wss://relay.damus.io",
@@ -13,13 +15,18 @@ const defaultRelays = [
 ];
 export const pool = new SimplePool();
 
-export function useEvents(filters, relays = defaultRelays) {
+export function useEvents(
+  filters,
+  relays = defaultRelays,
+  options = { closeOnEose: true }
+) {
+  const { closeOnEose } = options;
   const [eose, setEose] = useState(false);
   const [events, setEvents] = useState([]);
 
   const subHash = useMemo(() => {
-    return hash({ filters, relays });
-  }, [filters, relays]);
+    return hash({ filters, relays, options });
+  }, [filters, relays, options]);
 
   useEffect(() => {
     if (filters) {
@@ -27,18 +34,15 @@ export function useEvents(filters, relays = defaultRelays) {
 
       sub.on("event", (ev, relay) => {
         setEvents((evs) =>
-          uniqByFn(
-            utils.insertEventIntoDescendingList(evs, ev),
-            (e) =>
-              `${e.kind}:${e.pubkey}:${e.tags
-                .find((t) => t.at(0) === "d")
-                ?.at(1)}`
-          )
+          uniqByFn(utils.insertEventIntoDescendingList(evs, ev), getAddress)
         );
       });
 
       sub.on("eose", () => {
         setEose(true);
+        if (closeOnEose) {
+          sub.unsub();
+        }
       });
 
       return () => {
@@ -68,6 +72,7 @@ const uniqByFn = <T>(arr: T[], keyFn: any): T[] => {
   );
 };
 
+// todo: local storage atom
 const profilesAtom = atom({});
 
 export function useProfile(pubkey) {
@@ -79,7 +84,7 @@ export function useProfile(pubkey) {
         return;
       }
       setProfiles((ps) => {
-        return { ...ps, [pubkey]: {} };
+        return { ...ps, [pubkey]: { name: "", picture: "" } };
       });
       pool
         .get(defaultRelays, {

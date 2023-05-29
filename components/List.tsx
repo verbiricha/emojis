@@ -9,9 +9,13 @@ import {
   Card,
   CardHeader,
   CardBody,
+  CardFooter,
+  Button,
 } from "@chakra-ui/react";
+import { AddIcon, EditIcon } from "@chakra-ui/icons";
 import { nip19 } from "nostr-tools";
 
+import Zaps from "@emoji/components/Zaps";
 import User from "@emoji/components/User";
 import Emoji from "@emoji/components/Emoji";
 
@@ -38,9 +42,9 @@ export default function List({ event }) {
     }
   }, [event]);
   return (
-    <Card minW="22rem" maxW="42rem">
+    <Card minW="22rem" maxW="42rem" p={0}>
       <CardHeader>
-        <Flex flexDirection="column">
+        <Flex alignItems="center" justifyContent="space-between">
           {naddr ? (
             <Link href={`/a/${naddr}`}>
               <Heading>{identifier}</Heading>
@@ -58,6 +62,11 @@ export default function List({ event }) {
           ))}
         </Stack>
       </CardBody>
+      {false && (
+        <CardFooter>
+          <Zaps event={event} />
+        </CardFooter>
+      )}
     </Card>
   );
 }

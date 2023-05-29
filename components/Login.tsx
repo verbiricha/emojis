@@ -83,7 +83,7 @@ export default function Header() {
           Profile
         </MenuItem>
         <MenuItem icon={<AddIcon />} onClick={newList}>
-          New List
+          New Emoji pack
         </MenuItem>
         <MenuItem icon={<EditIcon />} onClick={newNote}>
           New Post
