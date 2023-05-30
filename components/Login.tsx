@@ -23,15 +23,34 @@ import {
 import { useAtom } from "jotai";
 import { nip19 } from "nostr-tools";
 
-import { RELAYS } from "@emoji/nostr/const";
-import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
-import { useProfile, pool } from "@emoji/nostr/hooks";
+import { RELAYS, USER_EMOJIS } from "@emoji/nostr/const";
+import { pubkeyAtom, relaysAtom, userEmojiAtom } from "@emoji/user/state";
+import { useProfile, pool, useEvents } from "@emoji/nostr/hooks";
 
 export default function Header() {
   const router = useRouter();
 
   const [relays, setRelays] = useAtom(relaysAtom);
   const [pubkey, setPubkey] = useAtom(pubkeyAtom);
+  const [, setUserEmoji] = useAtom(userEmojiAtom);
+
+  const { events } = useEvents(
+    [
+      {
+        kinds: [USER_EMOJIS],
+        authors: [pubkey],
+        limit: 1,
+      },
+    ],
+    relays,
+    { closeOnEose: false }
+  );
+
+  useEffect(() => {
+    if (events.length > 0) {
+      setUserEmoji(events.at(0));
+    }
+  }, [events]);
 
   const profile = useProfile(pubkey);
 

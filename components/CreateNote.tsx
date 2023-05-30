@@ -25,7 +25,7 @@ import Emoji from "@emoji/components/Emoji";
 import { USER_EMOJIS, EMOJIS } from "@emoji/nostr/const";
 import { useUserEmojis } from "@emoji/components/UserEmojis";
 import { pool, useEvents } from "@emoji/nostr/hooks";
-import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
+import { pubkeyAtom, relaysAtom, userEmojiAtom } from "@emoji/user/state";
 
 function filterEmojis(tags: string[], token: string) {
   const results = tags
@@ -53,15 +53,14 @@ export default function CreateNote({ event, showPreview = true }) {
   const router = useRouter();
   const [relays] = useAtom(relaysAtom);
   const [pubkey] = useAtom(pubkeyAtom);
-
+  const [userEmoji] = useAtom(userEmojiAtom);
   const [tags, setTags] = useState([]);
   const [content, setContent] = useState("");
-
   const { events } = useEvents(
-    [{ kinds: [USER_EMOJIS, EMOJIS], authors: [pubkey] }],
+    [{ kinds: [EMOJIS], authors: [pubkey] }],
     relays
   );
-  const userEmojis = useUserEmojis(events.find((e) => e.kind === USER_EMOJIS));
+  const userEmojis = useUserEmojis(userEmoji);
   const emojis = useMemo(() => {
     let results = [];
     events.forEach((ev) => {

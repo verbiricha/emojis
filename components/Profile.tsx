@@ -8,18 +8,17 @@ import { EMOJIS, USER_EMOJIS } from "@emoji/nostr/const";
 import List from "@emoji/components/List";
 import UserEmojis from "@emoji/components/UserEmojis";
 import { pool, useProfile, useEvents } from "@emoji/nostr/hooks";
-import { relaysAtom } from "@emoji/user/state";
+import { relaysAtom, userEmojiAtom } from "@emoji/user/state";
 import EmojiGrid from "@emoji/components/EmojiGrid";
 
 export default function Profile({ pubkey }) {
   const [relays] = useAtom(relaysAtom);
+  const [userEmoji] = useAtom(userEmojiAtom);
   const profile = useProfile(pubkey);
   const { events, eose } = useEvents(
-    [{ kinds: [EMOJIS, USER_EMOJIS], authors: [pubkey] }],
+    [{ kinds: [EMOJIS], authors: [pubkey] }],
     relays
   );
-  const packs = events.filter((ev) => ev.kind === EMOJIS);
-  const profileEmoji = events.find((ev) => ev.kind === USER_EMOJIS);
   return (
     <Flex flexDirection="column" alignItems="center" gap={4}>
       {profile && (
@@ -28,10 +27,10 @@ export default function Profile({ pubkey }) {
           <Heading>{profile.name}</Heading>
         </Flex>
       )}
-      {profileEmoji && <UserEmojis event={profileEmoji} />}
+      {userEmoji && <UserEmojis event={userEmoji} />}
       <Heading>Emoji packs</Heading>
       <EmojiGrid>
-        {packs.map((ev) => (
+        {events.map((ev) => (
           <List key={ev.id} event={ev} w="100vh" maxW="16rem" />
         ))}
       </EmojiGrid>

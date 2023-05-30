@@ -25,6 +25,7 @@ import {
 } from "@chakra-ui/react";
 import {
   AddIcon,
+  DeleteIcon,
   EditIcon,
   HamburgerIcon,
   ExternalLinkIcon,
@@ -34,7 +35,7 @@ import { nip19 } from "nostr-tools";
 
 import { USER_EMOJIS } from "@emoji/nostr/const";
 import { pool } from "@emoji/nostr/hooks";
-import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
+import { pubkeyAtom, relaysAtom, userEmojiAtom } from "@emoji/user/state";
 import { getIdentifier, getAddress } from "@emoji/nostr/address";
 import Zaps from "@emoji/components/Zaps";
 import User from "@emoji/components/User";
@@ -44,6 +45,12 @@ function ListMenu({ naddr, event, isDetail }) {
   const router = useRouter();
   const [pubkey] = useAtom(pubkeyAtom);
   const [relays] = useAtom(relaysAtom);
+  const [userEmoji] = useAtom(userEmojiAtom);
+  const address = getAddress(event);
+
+  const hasListAdded = userEmoji?.tags.find(
+    (t) => t.at(0) === "a" && t.at(1) === address
+  );
 
   async function addToMyEmoji() {
     try {
@@ -52,7 +59,6 @@ function ListMenu({ naddr, event, isDetail }) {
         authors: [pubkey],
       });
       if (userEmoji) {
-        const address = getAddress(event);
         const tags = userEmoji.tags.filter(
           (t) => t.at(0) === "a" && t.at(1) !== address
         );
@@ -79,6 +85,31 @@ function ListMenu({ naddr, event, isDetail }) {
     }
   }
 
+  async function removeFromMyEmoji() {
+    try {
+      const userEmoji = await pool.get(relays, {
+        kinds: [USER_EMOJIS],
+        authors: [pubkey],
+      });
+      if (userEmoji) {
+        const address = getAddress(event);
+        const tags = userEmoji.tags.filter(
+          (t) => t.at(0) === "a" && t.at(1) !== address
+        );
+        const ev = {
+          kind: USER_EMOJIS,
+          content: "",
+          created_at: Math.floor(Date.now() / 1000),
+          tags,
+        };
+        const signed = await window.nostr.signEvent(ev);
+        pool.publish(relays, signed);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <Menu>
       <MenuButton
@@ -88,9 +119,15 @@ function ListMenu({ naddr, event, isDetail }) {
         variant="unstyled"
       />
       <MenuList>
-        <MenuItem icon={<AddIcon />} onClick={addToMyEmoji}>
-          Add to my emoji
-        </MenuItem>
+        {hasListAdded ? (
+          <MenuItem icon={<DeleteIcon />} onClick={removeFromMyEmoji}>
+            Remove from my emoji
+          </MenuItem>
+        ) : (
+          <MenuItem icon={<AddIcon />} onClick={addToMyEmoji}>
+            Add to my emoji
+          </MenuItem>
+        )}
         {!isDetail && (
           <MenuItem
             icon={<ExternalLinkIcon />}
