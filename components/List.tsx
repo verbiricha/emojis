@@ -137,7 +137,7 @@ export default function List({
           )}
         </Flex>
       </CardHeader>
-      <CardBody maxH="21rem" overflow="scroll">
+      <CardBody>
         <EmojiList emojis={emojis} />
       </CardBody>
       <CardFooter>

@@ -32,7 +32,7 @@ export default function Profile({ pubkey }) {
       <Heading>Emoji packs</Heading>
       <EmojiGrid>
         {packs.map((ev) => (
-          <List key={ev.id} event={ev} />
+          <List key={ev.id} event={ev} w="100vh" maxW="16rem" />
         ))}
       </EmojiGrid>
     </Flex>
