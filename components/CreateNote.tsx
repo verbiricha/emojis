@@ -69,7 +69,7 @@ export default function CreateNote({ event, showPreview = true }) {
       results = results.concat(es);
     });
     return results.concat(userEmojis);
-  }, [events]);
+  }, [events, userEmojis]);
 
   const ev = useMemo(() => {
     const event = {
