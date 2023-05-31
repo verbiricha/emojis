@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { nip19 } from "nostr-tools";
 
-import { Flex, Stack, Heading, Button, Input, Tooltip } from "@chakra-ui/react";
+import {
+  Flex,
+  Stack,
+  Heading,
+  Button,
+  Input,
+  Textarea,
+  Tooltip,
+} from "@chakra-ui/react";
 import { QuestionOutlineIcon } from "@chakra-ui/icons";
 import { useAtom } from "jotai";
 
@@ -36,6 +44,28 @@ export default function CreateList({ event, showPreview = true }) {
 
   const [name, setName] = useState("");
   const [url, setURL] = useState("");
+  const [json, setJson] = useState("");
+
+  useEffect(() => {
+    if (json.length > 0) {
+      try {
+        const parsed = JSON.parse(json);
+        if (parsed) {
+          const newPairs = Object.entries(parsed).map(([name, url]) => {
+            return {
+              name,
+              url,
+            };
+          });
+
+          setPairs([...pairs, ...newPairs]);
+        }
+        setJson("");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [json]);
 
   const ev = useMemo(() => {
     const event = {
@@ -115,6 +145,11 @@ export default function CreateList({ event, showPreview = true }) {
             />
             <Input placeholder="URL" value={url} onChange={handleURLChange} />
           </Stack>
+          <Textarea
+            placeholder="JSON"
+            value={json}
+            onChange={(e) => setJson(e.target.value)}
+          />
           <Button isDisabled={!name || !url} mt={4} onClick={handleAddPair}>
             Add Emoji
           </Button>
