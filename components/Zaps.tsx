@@ -5,7 +5,7 @@ import { useAtom } from "jotai";
 
 import { ZAP } from "@emoji/nostr/const";
 import { useEvents } from "@emoji/nostr/hooks";
-import { relaysAtom } from "@emoji/user/state";
+import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
 import { getZapRequest, getZapAmount } from "@emoji/nostr/nip57";
 import { formatShortNumber } from "@emoji/format";
 import { getAddress } from "@emoji/nostr/address";
@@ -14,6 +14,7 @@ import ZapIcon from "@emoji/icons/Zap";
 
 export default function Zaps({ event }) {
   const [relays] = useAtom(relaysAtom);
+  const [pubkey] = useAtom(pubkeyAtom);
   const filters = [
     {
       "#a": [getAddress(event)],

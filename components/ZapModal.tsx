@@ -27,6 +27,7 @@ import {
   NumberDecrementStepper,
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
+import { generatePrivateKey, finishEvent } from "nostr-tools";
 
 import { ZAP_REQUEST } from "@emoji/nostr/const";
 import { getRefTag } from "@emoji/nostr/address";
@@ -162,23 +163,25 @@ export default function ZapModal({ event, isOpen, onClose }) {
   }, [event, profile, isOpen]);
 
   async function zapRequest() {
+    const amount = sats * 1000;
+    const ev = {
+      kind: ZAP_REQUEST,
+      created_at: Math.round(Date.now() / 1000),
+      content: comment,
+      tags: [
+        ["p", event.pubkey],
+        getRefTag(event),
+        ["amount", String(amount)],
+        ["relays", ...relays],
+      ],
+    };
     try {
-      const amount = sats * 1000;
-      const ev = {
-        kind: ZAP_REQUEST,
-        created_at: Math.round(Date.now() / 1000),
-        content: comment,
-        tags: [
-          ["p", event.pubkey],
-          getRefTag(event),
-          ["amount", String(amount)],
-          ["relays", ...relays],
-        ],
-      };
       const signed = await window.nostr.signEvent(ev);
       return signed;
     } catch (error) {
       console.error(error);
+      const signed = await finishEvent(ev, generatePrivateKey());
+      return signed;
     }
   }
 
