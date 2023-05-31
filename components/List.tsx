@@ -51,6 +51,7 @@ function ListMenu({ naddr, event, isDetail }) {
   const hasListAdded = userEmoji?.tags.find(
     (t) => t.at(0) === "a" && t.at(1) === address
   );
+  const isMine = pubkey === event.pubkey;
 
   async function addToMyEmoji() {
     try {
@@ -126,6 +127,14 @@ function ListMenu({ naddr, event, isDetail }) {
         ) : (
           <MenuItem icon={<AddIcon />} onClick={addToMyEmoji}>
             Add to my emoji
+          </MenuItem>
+        )}
+        {isMine && (
+          <MenuItem
+            icon={<EditIcon />}
+            onClick={() => router.push(`/a/${naddr}/edit`)}
+          >
+            Edit
           </MenuItem>
         )}
         {!isDetail && (

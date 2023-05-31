@@ -12,6 +12,7 @@ import List from "@emoji/components/List";
 import Emoji from "@emoji/components/Emoji";
 import { pool } from "@emoji/nostr/hooks";
 import { EMOJIS } from "@emoji/nostr/const";
+import { getIdentifier } from "@emoji/nostr/address";
 import { pubkeyAtom, relaysAtom } from "@emoji/user/state";
 
 // todo: edit
@@ -21,7 +22,7 @@ export default function CreateList({ event, showPreview = true }) {
   const [pubkey] = useAtom(pubkeyAtom);
 
   const [listName, setListName] = useState(
-    event ? event.tags.find((t) => t.at(0) === "d")?.at(1) ?? "" : ""
+    event ? getIdentifier(event) ?? "" : ""
   );
   const [pairs, setPairs] = useState(
     event
