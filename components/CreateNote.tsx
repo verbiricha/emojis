@@ -67,15 +67,16 @@ export default function CreateNote({ event, showPreview = true }) {
       const es = ev.tags.filter((t) => t.at(0) === "emoji");
       results = results.concat(es);
     });
-    return results.concat(userEmojis);
+    return uniqByFn(results.concat(userEmojis), (e) => e.at(0));
   }, [events, userEmojis]);
 
   const ev = useMemo(() => {
+    const emoji = emojis.filter((e) => content.includes(`:${e.at(1)}:`));
     const event = {
       kind: 1,
       content,
       created_at: Math.floor(Date.now() / 1000),
-      tags: emojis.filter((e) => content.includes(`:${e.at(1)}:`)),
+      tags: emoji,
     };
     if (pubkey) {
       event.pubkey = pubkey;
