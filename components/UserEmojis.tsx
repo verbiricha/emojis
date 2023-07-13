@@ -8,6 +8,7 @@ import { EMOJIS, USER_EMOJIS } from "@emoji/nostr/const";
 import { useEvents } from "@emoji/nostr/hooks";
 import { relaysAtom } from "@emoji/user/state";
 import EmojiList from "@emoji/components/EmojiList";
+import { cleanShortcode } from "@emoji/nostr/emoji";
 
 export function useUserEmojis(event) {
   const [relays] = useAtom(relaysAtom);
@@ -31,12 +32,18 @@ export function useUserEmojis(event) {
     }
   );
   const { events, eose } = useEvents([filter], relays);
-  const mainEmojis = tags.filter((t) => t.at(0) === "emoji");
+  const mainEmojis = tags
+    .filter((t) => t.at(0) === "emoji")
+    .map((t) => ["emoji", cleanShortcode(t.at(1)), t.at(2)]);
   const linkedEmojis = events
     .filter((e) =>
       tags.find((t) => t.at(0) === "a" && t.at(1) === getAddress(e))
     )
-    .map((e) => e.tags.filter((t) => t.at(0) === "emoji"))
+    .map((e) =>
+      e.tags
+        .filter((t) => t.at(0) === "emoji")
+        .map((t) => ["emoji", cleanShortcode(t.at(1)), t.at(2)])
+    )
     .reverse()
     .flat();
   return [...mainEmojis, ...linkedEmojis];

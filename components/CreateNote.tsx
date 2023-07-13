@@ -26,13 +26,14 @@ import { USER_EMOJIS, EMOJIS } from "@emoji/nostr/const";
 import { useUserEmojis } from "@emoji/components/UserEmojis";
 import { pool, useEvents } from "@emoji/nostr/hooks";
 import { pubkeyAtom, relaysAtom, userEmojiAtom } from "@emoji/user/state";
+import { cleanShortcode } from "@emoji/nostr/emoji";
 
 function filterEmojis(tags: string[], token: string) {
   const results = tags
     .filter((t) => t.at(0) === "emoji")
     .map((t) => {
       const [, name, url] = t;
-      return { name, url };
+      return { name: cleanShortcode(name), url };
     })
     .filter(({ name, url }) => {
       return name.includes(token);
@@ -64,7 +65,9 @@ export default function CreateNote({ event, showPreview = true }) {
   const emojis = useMemo(() => {
     let results = [];
     events.forEach((ev) => {
-      const es = ev.tags.filter((t) => t.at(0) === "emoji");
+      const es = ev.tags
+        .filter((t) => t.at(0) === "emoji")
+        .map((t) => ["emoji", cleanShortcode(t.at(1)), t.at(2)]);
       results = results.concat(es);
     });
     return results.concat(userEmojis);
