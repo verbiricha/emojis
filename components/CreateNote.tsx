@@ -74,7 +74,10 @@ export default function CreateNote({ event, showPreview = true }) {
   }, [events, userEmojis]);
 
   const ev = useMemo(() => {
-    const emoji = emojis.filter((e) => content.includes(`:${e.at(1)}:`));
+    const emoji = uniqByFn(
+      emojis.filter((e) => content.includes(`:${e.at(1)}:`)),
+      (e) => e.at(1)
+    );
     const event = {
       kind: 1,
       content,
